@@ -8,23 +8,23 @@ This is a customizable domain discovery, recon, and security tool based on Certi
 ### Run with Python
 
 1. Install python dependencies with `pip install -r requirements`.
-2. Edit the `config.py` to setup the application.
+2. Edit `config.py` to configure the application.
 3. Run the application using `python certpipe.py`
 
 ### Run in Docker
 
 Easily create and run a CertPipe Docker image:
 
-1. Edit the `config.py` to setup the application.
+1. Edit `config.py` to configure the application.
 2. Build the image using `docker build -t certpipe-docker .` within the CertPipe directory.
 3. Start the Docker container in headless mode with `docker run -d certpipe-docker`
 
 ### Output
 
-Results can be viewed a few ways:
+Results can be viewed in a few ways:
 
 - Slack alerting. Useful for receiving alerts on mobile device.
-- CSV output file found in application directory (certpipe_matches.csv)
+- CSV output (certpipe_matches.csv)
 - Text output in terminal window
 
 ## TODO:
