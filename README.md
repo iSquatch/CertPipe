@@ -10,6 +10,14 @@ This is a customizable domain discovery, recon, and security tool based on Certi
 
 ## Usage
 
+### Basic Configuration
+
+To get started, basic CertPipe configuration involves specifying keywords to search for (or ignore).  Edit the `config.py` file using a text editor to modify the configuration.
+
+Here are the keyword settings in `config.py`:
+
+![Example Screenshot of Keyword Configuration](https://github.com/iSquatch/CertPipe/blob/master/images/certpipe_example_config_screenshot_1.png)
+
 ### Run with Python
 
 1. Install python dependencies with `pip install -r requirements`.
@@ -22,7 +30,7 @@ Easily create and run a CertPipe Docker image:
 
 1. Edit `config.py` to configure the application.
 2. Build the image using `docker build -t certpipe-docker .` within the CertPipe directory.
-3. Start the Docker container in headless mode with `docker run -d certpipe-docker`
+3. Start the Docker container in headless mode with `docker run -d certpipe-docker`.
 
 ### Output
 
