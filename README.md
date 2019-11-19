@@ -32,6 +32,11 @@ Results can be viewed in a few ways:
 - CSV output (certpipe_matches.csv)
 - Text output in terminal window
 
+#### Example Text Output
+
+![Example Screenshot of Text Output](https://github.com/iSquatch/CertPipe/blob/master/images/certpipe_example_screenshot_1.png)
+
+
 ## TODO:
 
 - [x] List of keywords to alert on
