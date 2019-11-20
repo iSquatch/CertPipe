@@ -298,6 +298,14 @@ def post_to_slack(msg):
     logger.info("Message posted to Slack: {}".format(msg))
 
 
+# Posts a message to a Mattermost Channel using the Incoming Webhooks feature
+def post_to_mattermost(msg):
+    if requests.post(cfg.mattermost_webhook_url, json={"text": msg}):
+        logger.info("Message posted to Mattermost: {}".format(msg))
+    else:
+        logger.error("Message failed to post to Mattermost")
+
+
 # Write matched domains to a local CSV file. CSV file hase 3 columns: timestamp, matched_keyword, domain
 def write_to_csv_output(matched_keyword, domain):
     logger.info("Writing output to CSV file")
@@ -314,7 +322,7 @@ def write_to_csv_output(matched_keyword, domain):
             output_file.write(str(datetime.now()) + ", " + str(matched_keyword) + ", " + str(domain) + "\r\n")
             output_file.close()
     except IOError as e:
-        print("File I/O error({0}): {1}".format(e.errno, e.strerror))
+        logger.error("File I/O error({0}): {1}".format(e.errno, e.strerror))
         
 
 # Generate fuzzed keywords to look for lookalike domains/keywords
@@ -373,6 +381,9 @@ def certstream_callback(message, context):
 
                 if cfg.enable_slack:
                     post_to_slack("Matched Keyword: " +  matched_keyword + " : " + domain)
+                
+                if cfg.enable_mattermost:
+                    post_to_mattermost("Matched Keyword: " + matched_keyword + " : " + domain)
 
                 if cfg.enable_csv_output:
                     write_to_csv_output(matched_keyword, domain)

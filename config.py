@@ -43,7 +43,6 @@ slack_channel = "<INSERT SLACK CHANNEL HERE>"
 enable_mattermost = False
 mattermost_webhook_url = "https://<INSERT MATTERMOST SITE>/hooks/<INSERT GENERATED KEY>"
 
-
 # Syslog configuration TODO
 #enable_syslog = False
 #syslog_server = "10.10.11.18"
