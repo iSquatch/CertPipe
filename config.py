@@ -36,18 +36,18 @@ output_csv_file = "certpipe_matches.csv"
 
 # Slack alerting configuration.
 enable_slack = False
-slack_token = "<INSERT SLACK API TOKEN HERE>"
-slack_channel = "<INSERT SLACK CHANNEL HERE>"
+slack_token = "<INSERT SLACK API TOKEN>"
+slack_channel = "<INSERT SLACK CHANNEL>"
 
 # Mattermost alerting configuration. Requires an Incoming Webhook to be created and added to a channel.
 enable_mattermost = False
 mattermost_webhook_url = "https://<INSERT MATTERMOST SITE>/hooks/<INSERT GENERATED KEY>"
 
+# Submit matched domains to URLScan.io and provides links to the scan results in output / alerts. 
+enable_urlscanio = False
+urlscanio_api_key = "<INSERT URLSCAN.IO API KEY>"
+
 # Syslog configuration TODO
 #enable_syslog = False
 #syslog_server = "10.10.11.18"
 #syslog_port = 514
-
-# TODO
-#scan_matches = False
-#screenshot_matches = False
