@@ -53,7 +53,9 @@ Results can be viewed in a few ways:
 - [x] Text output
 - [x] Basic Logging / Debug
 - [x] Slack alerting
+- [ ] Mattermost Webhook alerting
 - [ ] Syslog output
+- [ ] CLI argument handling for configuration
 - [x] CSV file output
 - [x] Output type: matched domains
 - [ ] Output type: full detailed JSON
