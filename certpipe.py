@@ -44,6 +44,7 @@ import sys
 from datetime import datetime 
 import os
 import re
+import requests
 import certstream
 from slackclient import SlackClient
 import config as cfg
