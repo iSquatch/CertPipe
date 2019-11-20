@@ -375,9 +375,8 @@ def certstream_callback(message, context):
         for domain in all_domains:
             is_match, matched_keyword = check_match(domain)
             
-            if is_match:
+            if is_match: 
                 logger.info("Matched Keyword : " + matched_keyword + " : " + domain)
-                print(matched_keyword + " : " + domain)
 
                 if cfg.enable_slack:
                     post_to_slack("Matched Keyword: " +  matched_keyword + " : " + domain)
@@ -387,6 +386,8 @@ def certstream_callback(message, context):
 
                 if cfg.enable_csv_output:
                     write_to_csv_output(matched_keyword, domain)
+
+                print(matched_keyword + " : " + domain)
 
 
 # Called when the CertSream listener is opened
