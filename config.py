@@ -18,7 +18,7 @@
 #
 ###########################################################################
 
-# Enable verbose logging.
+# Set to True to enable verbose logging. Set to False to only output the matched keywords and domains.
 enable_logging = True
 
 # These keywords will be fuzzed so that look-alike domain matches are identified. 
