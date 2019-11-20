@@ -300,7 +300,7 @@ def post_to_slack(msg):
 
 # Posts a message to a Mattermost Channel using the Incoming Webhooks feature
 def post_to_mattermost(msg):
-    if requests.post(cfg.mattermost_webhook_url, json={"text": msg}):
+    if requests.post(cfg.mattermost_webhook_url, verify=True, json={"text": msg}):
         logger.info("Message posted to Mattermost: {}".format(msg))
     else:
         logger.error("Message failed to post to Mattermost")
@@ -407,6 +407,12 @@ def initial_configuration():
     logging.basicConfig(format='[%(levelname)s:%(name)s] %(asctime)s - %(message)s', level=log_level)
     logger.disabled = not cfg.enable_logging
     logger.info("Logging level: {}".format("INFO" if 20 == log_level else "DEBUG" ))
+
+    # Log alerting configuration
+    logger.info("CSV output file: ".format("Enabled" if cfg.enable_csv_output else "Disabled"))
+    logger.info("Slack alerting: {}".format("Enabled" if cfg.enable_slack else "Disabled"))
+    logger.info("Mattermost alerting: {}".format("Enabled" if cfg.enable_mattermost else "Disabled"))
+    
 
     # Created fuzzed keywords
     logger.info("{} keywords in config file".format(len(cfg.keywords)))
