@@ -322,7 +322,7 @@ def write_to_csv_output(matched_keyword, domain):
             output_file.write(str(datetime.now()) + ", " + str(matched_keyword) + ", " + str(domain) + "\r\n")
             output_file.close()
     except IOError as e:
-        logger.error("File I/O error({0}): {1}".format(e.errno, e.strerror))
+        logger.error("CSV File I/O error({0}): {1}".format(e.errno, e.strerror))
         
 
 # Generate fuzzed keywords to look for lookalike domains/keywords
