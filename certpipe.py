@@ -307,37 +307,41 @@ def post_to_mattermost(msg):
 
 
 # Write matched domains to a local CSV file. CSV file hase 3 columns: timestamp, matched_keyword, domain
-def write_to_csv_output(matched_keyword, domain):
+def write_to_csv_output(matched_keyword, domain, scan_results_url):
     logger.info("Writing output to CSV file")
     
     # Create the file and add the first row header if it does not exist
     if not os.path.exists(cfg.output_csv_file):
         with open(cfg.output_csv_file, "w+") as output_file:
-            output_file.write("timestamp, matched_keyword, domain\r\n")
+            output_file.write("timestamp, matched_keyword, domain, scan_results_url\r\n")
             output_file.close()
 
     # Add a new row to the csv file and close it
     try:
         with open(cfg.output_csv_file, "a") as output_file:
-            output_file.write(str(datetime.now()) + ", " + str(matched_keyword) + ", " + str(domain) + "\r\n")
+            output_file.write(str(datetime.now()) + ", " + str(matched_keyword) + ", " + str(domain) + ", " + str(scan_results_url) + "\r\n")
             output_file.close()
     except IOError as e:
         logger.error("CSV File I/O error({0}): {1}".format(e.errno, e.strerror))
         
 
+# Submit the domain to URLScan.io's API and return the URL link to the scan result.
 def submit_to_urlscanio(domain):
     # Remove the leading *. on the domain if it exists
     if domain[0] == '*':
         domain = domain[2:]
     
-    req_header = {'Content-Type':'Application/json', 'API-Key':cfg.urlscanio_api_key}
-    req_payload = {"text": msg}
-    req = requests.post("https://urlscan.io/api/v1/scan/", verify=True, headers=req_headers, json=req_payload)
-    if req:
-        logger.info("Domain submitted to URLScan.io: {}".format(domain))
-    else:
-        logger.error("Domain failed to submit to URLScan.io")
+    req_headers = {'Content-Type':'Application/json', 'API-Key':cfg.urlscanio_api_key}
+    req_payload = {'url': domain, 'public':'on'}
+    resp = requests.post("https://urlscan.io/api/v1/scan/", verify=True, headers=req_headers, json=req_payload)
 
+    if resp.ok:
+        logger.info("Domain submitted to URLScan.io: {}".format(domain))    
+        logger.info("HTTP scan results URL: " + str(resp.json()['result']))
+        return resp.json()['result']
+    else:
+        logger.info("Domain unable to be scanned by URLScan.io: {}".format(domain))
+        return ""
 
 # Generate fuzzed keywords to look for lookalike domains/keywords
 def fuzz_keywords(wordlist):
@@ -361,13 +365,13 @@ def check_match(domain):
     # Check if the domains contains any of the 'no fuzz' keywords
     for keyword in cfg.no_fuzz_keywords:
         if keyword in domain:
-            logger.info("Found match:{}".format(domain))
+            logger.info("Found match: {}".format(domain))
             return True, keyword
 
     # Check if the domain contains any of the fuzzed keywords
     for keyword in fuzzed_keywords:
         if keyword in domain:
-            logger.info("Found match:{}".format(domain))
+            logger.info("Found match: {}".format(domain))
             return True, keyword
 
     return False, ""
@@ -397,9 +401,19 @@ def certstream_callback(message, context):
                 
                 if cfg.enable_mattermost:
                     post_to_mattermost("Matched Keyword: " + matched_keyword + "\n" + domain)
+                    
+                scan_results_url = ""
+                if cfg.enable_urlscanio:
+                    scan_results_url = submit_to_urlscanio(domain)
+
+                    if cfg.urlscanio_output_scan_url and len(scan_results_url) > 1:
+                        if cfg.enable_slack:
+                            post_to_slack("HTTP scan result: " + scan_results_url)
+                        if cfg.enable_mattermost:
+                            post_to_mattermost("HTTP scan result: " + scan_results_url)
 
                 if cfg.enable_csv_output:
-                    write_to_csv_output(matched_keyword, domain)
+                    write_to_csv_output(matched_keyword, domain, scan_results_url)
 
                 print(matched_keyword + " : " + domain)
 
