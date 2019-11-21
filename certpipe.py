@@ -300,7 +300,7 @@ def post_to_slack(msg):
 
 # Posts a message to a Mattermost Channel using the Incoming Webhooks feature
 def post_to_mattermost(msg):
-    if requests.post(cfg.mattermost_webhook_url, verify=True, json={"text": msg}):
+    if requests.post(cfg.mattermost_webhook_url, verify=True, json={"username":"CertPipe", "text": msg}):
         logger.info("Message posted to Mattermost: {}".format(msg))
     else:
         logger.error("Message failed to post to Mattermost")
@@ -337,8 +337,8 @@ def submit_to_urlscanio(domain):
 
     if resp.ok:
         logger.info("Domain submitted to URLScan.io: {}".format(domain))    
-        logger.info("HTTP scan results URL: " + str(resp.json()['result']))
-        return resp.json()['result']
+        logger.info("Scan results URL: " + str(resp.json()['result']))
+        return resp.json()['result'], domain
     else:
         logger.info("Domain unable to be scanned by URLScan.io: {}".format(domain))
         return ""
@@ -404,13 +404,13 @@ def certstream_callback(message, context):
                     
                 scan_results_url = ""
                 if cfg.enable_urlscanio:
-                    scan_results_url = submit_to_urlscanio(domain)
+                    scan_results_url, scanned_domain = submit_to_urlscanio(domain)
 
                     if cfg.urlscanio_output_scan_url and len(scan_results_url) > 1:
                         if cfg.enable_slack:
-                            post_to_slack("HTTP scan result: " + scan_results_url)
+                            post_to_slack(scanned_domain + "\nScan result: " + scan_results_url)
                         if cfg.enable_mattermost:
-                            post_to_mattermost("HTTP scan result: " + scan_results_url)
+                            post_to_mattermost(scanned_domain + "\nScan result: " + scan_results_url)
 
                 if cfg.enable_csv_output:
                     write_to_csv_output(matched_keyword, domain, scan_results_url)
@@ -444,6 +444,9 @@ def initial_configuration():
     
     # URLScan.io configuration
     logger.info("URLScan.io submission: {}".format("Enabled" if cfg.enable_urlscanio else "Disabled"))
+    
+    if cfg.urlscanio_output_scan_url:
+        logger.info("Note: URLScan.io links will return an HTTP 404 response until the scan has finished (~10s)")
 
     # Created fuzzed keywords
     logger.info("{} keywords in config file".format(len(cfg.keywords)))
