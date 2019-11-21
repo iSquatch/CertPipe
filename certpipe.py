@@ -325,6 +325,20 @@ def write_to_csv_output(matched_keyword, domain):
         logger.error("CSV File I/O error({0}): {1}".format(e.errno, e.strerror))
         
 
+def submit_to_urlscanio(domain):
+    # Remove the leading *. on the domain if it exists
+    if domain[0] == '*':
+        domain = domain[2:]
+    
+    req_header = {'Content-Type':'Application/json', 'API-Key':cfg.urlscanio_api_key}
+    req_payload = {"text": msg}
+    req = requests.post("https://urlscan.io/api/v1/scan/", verify=True, headers=req_headers, json=req_payload)
+    if req:
+        logger.info("Domain submitted to URLScan.io: {}".format(domain))
+    else:
+        logger.error("Domain failed to submit to URLScan.io")
+
+
 # Generate fuzzed keywords to look for lookalike domains/keywords
 def fuzz_keywords(wordlist):
     fuzzed_list = []
@@ -414,6 +428,8 @@ def initial_configuration():
     logger.info("Slack alerting: {}".format("Enabled" if cfg.enable_slack else "Disabled"))
     logger.info("Mattermost alerting: {}".format("Enabled" if cfg.enable_mattermost else "Disabled"))
     
+    # URLScan.io configuration
+    logger.info("URLScan.io submission: {}".format("Enabled" if cfg.enable_urlscanio else "Disabled"))
 
     # Created fuzzed keywords
     logger.info("{} keywords in config file".format(len(cfg.keywords)))

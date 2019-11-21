@@ -46,6 +46,7 @@ mattermost_webhook_url = "https://<INSERT MATTERMOST SITE>/hooks/<INSERT GENERAT
 # Submit matched domains to URLScan.io and provides links to the scan results in output / alerts. 
 enable_urlscanio = False
 urlscanio_api_key = "<INSERT URLSCAN.IO API KEY>"
+urlscanio_output_scan_url = False
 
 # Syslog configuration TODO
 #enable_syslog = False
