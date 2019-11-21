@@ -293,7 +293,7 @@ def post_to_slack(msg):
     sc.api_call(
         "chat.postMessage",
         channel = cfg.slack_channel,
-        text = "[INFO]: " + msg
+        text = msg
     )
     logger.info("Message posted to Slack: {}".format(msg))
 
@@ -376,13 +376,13 @@ def certstream_callback(message, context):
             is_match, matched_keyword = check_match(domain)
             
             if is_match: 
-                logger.info("Matched Keyword : " + matched_keyword + " : " + domain)
+                logger.info("Matched Keyword: " + matched_keyword + "\n" + domain)
 
                 if cfg.enable_slack:
-                    post_to_slack("Matched Keyword: " +  matched_keyword + " : " + domain)
+                    post_to_slack("Matched Keyword: " +  matched_keyword + "\n" + domain)
                 
                 if cfg.enable_mattermost:
-                    post_to_mattermost("Matched Keyword: " + matched_keyword + " : " + domain)
+                    post_to_mattermost("Matched Keyword: " + matched_keyword + "\n" + domain)
 
                 if cfg.enable_csv_output:
                     write_to_csv_output(matched_keyword, domain)
