@@ -40,6 +40,7 @@ Results can be viewed in a few ways:
 - Slack or Mattermost alerting. Useful for receiving alerts on mobile device.
 - CSV output (certpipe_matches.csv)
 - Text output in terminal window
+- URLScan.io scan results for matched domains
 
 #### Example Text Output
 
