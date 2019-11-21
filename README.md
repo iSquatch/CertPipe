@@ -61,7 +61,6 @@ Results can be viewed in a few ways:
 - [ ] Output type: full detailed JSON
 - [x] Create a configuration file
 - [x] Load configuration from configuration file
-- [ ] Scan the domains that match the keywords (urlscan.io?)
-- [ ] Save HTTP screenshots of domains that match keywords
+- [x] Scan the domains that match the keywords (URLScan.io Submission API)
 - [ ] Improve exception handling
 - [x] Add Docker deployment option
