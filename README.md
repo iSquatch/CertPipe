@@ -36,7 +36,7 @@ Easily create and run a CertPipe Docker image:
 
 Results can be viewed in a few ways:
 
-- Slack alerting. Useful for receiving alerts on mobile device.
+- Slack or Mattermost alerting. Useful for receiving alerts on mobile device.
 - CSV output (certpipe_matches.csv)
 - Text output in terminal window
 
@@ -53,7 +53,7 @@ Results can be viewed in a few ways:
 - [x] Text output
 - [x] Basic Logging / Debug
 - [x] Slack alerting
-- [ ] Mattermost Webhook alerting
+- [x] Mattermost Webhook alerting
 - [ ] Syslog output
 - [ ] CLI argument handling for configuration
 - [x] CSV file output
