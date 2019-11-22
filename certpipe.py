@@ -300,11 +300,10 @@ def post_to_slack(msg):
 
 # Posts a message to a Mattermost Channel using the Incoming Webhooks feature
 def post_to_mattermost(msg):
-    if requests.post(cfg.mattermost_webhook_url, verify=True, json={"username":"CertPipe", "text": msg}):
+    if requests.post(cfg.mattermost_webhook_url, verify=True, json={"username":"CertPipe", "icon_url":"https://www.mattermost.org/wp-content/uploads/2016/04/icon.png", "text": msg}):
         logger.info("Message posted to Mattermost: {}".format(msg))
     else:
         logger.error("Message failed to post to Mattermost")
-
 
 # Write matched domains to a local CSV file. CSV file hase 3 columns: timestamp, matched_keyword, domain
 def write_to_csv_output(matched_keyword, domain, scan_results_url):
