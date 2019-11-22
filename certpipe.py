@@ -305,6 +305,7 @@ def post_to_mattermost(msg):
     else:
         logger.error("Message failed to post to Mattermost")
 
+
 # Write matched domains to a local CSV file. CSV file hase 3 columns: timestamp, matched_keyword, domain
 def write_to_csv_output(matched_keyword, domain, scan_results_url):
     logger.info("Writing output to CSV file")
