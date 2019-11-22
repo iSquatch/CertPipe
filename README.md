@@ -4,6 +4,7 @@
 
 
 # CertPipe
+
 A CertStream monitoring tool. Monitor and alert on Certificate Transparency logs by looking for keyword matches. 
 
 This is a customizable domain discovery, recon, and security tool based on Certificate Transparency log monitoring.
@@ -39,6 +40,7 @@ Results can be viewed in a few ways:
 - Slack or Mattermost alerting. Useful for receiving alerts on mobile device.
 - CSV output (certpipe_matches.csv)
 - Text output in terminal window
+- URLScan.io scan results for matched domains
 
 #### Example Text Output
 
@@ -50,17 +52,17 @@ Results can be viewed in a few ways:
 - [x] List of keywords to alert on
 - [x] List of keywords to always ignore
 - [x] Use text similarity matching algorithms / Text Fuzzing
+- [x] Create a configuration file
 - [x] Text output
 - [x] Basic Logging / Debug
+- [x] Add Docker deployment option
 - [x] Slack alerting
 - [x] Mattermost Webhook alerting
-- [ ] Syslog output
-- [ ] CLI argument handling for configuration
 - [x] CSV file output
 - [x] Output type: matched domains
-- [ ] Output type: full detailed JSON
-- [x] Create a configuration file
-- [x] Load configuration from configuration file
 - [x] Scan the domains that match the keywords (URLScan.io Submission API)
+- [ ] Output type: full detailed JSON
+- [ ] Syslog output
+- [ ] CLI argument handling for configuration
 - [ ] Improve exception handling
-- [x] Add Docker deployment option
+- [ ] Lightweight web frontend for viewing live results
