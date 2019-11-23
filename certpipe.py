@@ -44,17 +44,24 @@ import sys
 from datetime import datetime 
 import os
 import re
+import threading
 import requests
 import certstream
 from slackclient import SlackClient
 import config as cfg
 
 
-# Global Variables
 log_level = logging.INFO #logging.DEBUG
 logger = logging.getLogger()
+
+# Will contains the list of fuzzed keywords
 fuzzed_keywords = []
 
+# Keep track of previously matched domains in a hashtable
+seen_domains = set()
+
+# For bulk sending of alert messages
+bulk_alert_message = ""
 
 # Fuzzing code based on: https://github.com/elceef/dnstwist 
 class DomainFuzz():
@@ -287,6 +294,27 @@ class DomainFuzz():
             self.domains.append({ 'fuzzer': 'Vowel-swap', 'domain-name': domain })
 
 
+# This function bulk sends alert data and gets called every n seconds based on cfg.alert_send_frequency
+def bulk_post_alerts():
+    
+    global bulk_alert_message
+
+    # Start the timer for the next run of this function
+    threading.Timer(cfg.alert_send_frequency, bulk_post_alerts).start()
+    
+    if bulk_alert_message:
+        
+        if cfg.enable_slack:
+            post_to_slack(bulk_alert_message)
+        
+        if cfg.enable_mattermost:
+            post_to_mattermost(bulk_alert_message)
+        
+        logger.info("The following alert message was sent:\n\n" + bulk_alert_message)
+
+        bulk_alert_message = ""
+
+
 # Posts a message to a Slack Channel using the Slack API and an access token
 def post_to_slack(msg):
     sc = SlackClient(cfg.slack_token)
@@ -295,13 +323,13 @@ def post_to_slack(msg):
         channel = cfg.slack_channel,
         text = msg
     )
-    logger.info("Message posted to Slack: {}".format(msg))
+    logger.debug("Message posted to Slack:\n {}".format(msg))
 
 
 # Posts a message to a Mattermost Channel using the Incoming Webhooks feature
 def post_to_mattermost(msg):
     if requests.post(cfg.mattermost_webhook_url, verify=True, json={"username":"CertPipe", "icon_url":"https://www.mattermost.org/wp-content/uploads/2016/04/icon.png", "text": msg}):
-        logger.info("Message posted to Mattermost: {}".format(msg))
+        logger.debug("Message posted to Mattermost:\n {}".format(msg))
     else:
         logger.error("Message failed to post to Mattermost")
 
@@ -326,11 +354,7 @@ def write_to_csv_output(matched_keyword, domain, scan_results_url):
         
 
 # Submit the domain to URLScan.io's API and return the URL link to the scan result.
-def submit_to_urlscanio(domain):
-    # Remove the leading *. on the domain if it exists
-    if domain[0] == '*':
-        domain = domain[2:]
-    
+def submit_to_urlscanio(domain): 
     req_headers = {'Content-Type':'Application/json', 'API-Key':cfg.urlscanio_api_key}
     req_payload = {'url': domain, 'public':'on'}
     resp = requests.post("https://urlscan.io/api/v1/scan/", verify=True, headers=req_headers, json=req_payload)
@@ -338,7 +362,7 @@ def submit_to_urlscanio(domain):
     if resp.ok:
         logger.info("Domain submitted to URLScan.io: {}".format(domain))    
         logger.info("Scan results URL: " + str(resp.json()['result']))
-        return resp.json()['result'], domain
+        return resp.json()['result']
     else:
         logger.info("Domain unable to be scanned by URLScan.io: {}".format(domain))
         return ""
@@ -379,6 +403,8 @@ def check_match(domain):
 
 # Called when data is pulled from CertStream
 def certstream_callback(message, context):
+    global bulk_alert_message
+
     logger.debug("Message -> {}".format(message))
 
     if message['message_type'] == "heartbeat":
@@ -391,29 +417,39 @@ def certstream_callback(message, context):
             return
 
         for domain in all_domains:
-            is_match, matched_keyword = check_match(domain)
             
-            if is_match: 
+            # Remove the leading *. on the domain if it exists
+            if domain[0] == '*':
+                domain = domain[2:]
+
+            is_match, matched_keyword = check_match(domain)
+
+            # Check whether or not we've seen the same domain previously, avoids duplicates domains in output
+            if domain not in seen_domains:
+                seen_before = False
+                seen_domains.add(domain)
+            else:
+                seen_before = True
+
+            if is_match and not seen_before: 
                 logger.info("Matched Keyword: " + matched_keyword + "\n" + domain)
 
-                if cfg.enable_slack:
-                    post_to_slack("Matched Keyword: " +  matched_keyword + "\n" + domain)
-                
-                if cfg.enable_mattermost:
-                    post_to_mattermost("Matched Keyword: " + matched_keyword + "\n" + domain)
-                    
                 scan_results_url = ""
                 if cfg.enable_urlscanio:
-                    scan_results_url, scanned_domain = submit_to_urlscanio(domain)
-
-                    if cfg.urlscanio_output_scan_url and len(scan_results_url) > 1:
-                        if cfg.enable_slack:
-                            post_to_slack(scanned_domain + "\nScan result: " + scan_results_url)
-                        if cfg.enable_mattermost:
-                            post_to_mattermost(scanned_domain + "\nScan result: " + scan_results_url)
+                    scan_results_url = submit_to_urlscanio(domain)
 
                 if cfg.enable_csv_output:
                     write_to_csv_output(matched_keyword, domain, scan_results_url)
+
+                # Add to the bulk alert message string
+                if cfg.enable_slack or cfg.enable_mattermost:
+                    bulk_alert_message = bulk_alert_message + "Keyword: " + matched_keyword + "\nDomain: " + domain
+                    
+                    if scan_results_url:
+                        bulk_alert_message = bulk_alert_message + "\nScan: " + scan_results_url
+                    
+                    bulk_alert_message = bulk_alert_message + "\n\n"
+                
 
                 print(matched_keyword + " : " + domain)
 
@@ -442,10 +478,13 @@ def initial_configuration():
     logger.info("Slack alerting: {}".format("Enabled" if cfg.enable_slack else "Disabled"))
     logger.info("Mattermost alerting: {}".format("Enabled" if cfg.enable_mattermost else "Disabled"))
     
+    if cfg.enable_slack or cfg.enable_mattermost:
+        logger.info("Remote alerts will be sent every {} seconds".format(cfg.alert_send_frequency))
+
     # URLScan.io configuration
     logger.info("URLScan.io submission: {}".format("Enabled" if cfg.enable_urlscanio else "Disabled"))
     
-    if cfg.urlscanio_output_scan_url:
+    if cfg.enable_urlscanio:
         logger.info("Note: URLScan.io links will return an HTTP 404 response until the scan has finished (~10s)")
 
     # Created fuzzed keywords
@@ -456,6 +495,9 @@ def initial_configuration():
     fuzzed_keywords = fuzz_keywords(cfg.keywords)
     logger.info("Keyword fuzzer finished")
     logger.info("{} fuzzed keywords created".format(len(fuzzed_keywords)))
+
+    # Start the bulk alert posting thread timer
+    bulk_post_alerts()
 
 
 # Connects to the CertStream service and specifies callback functions
