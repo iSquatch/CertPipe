@@ -61,7 +61,7 @@ Results can be viewed in a few ways:
 - [x] CSV file output
 - [x] Output type: matched domains
 - [x] Scan the domains that match the keywords (URLScan.io Submission API)
-- [ ] Option to bulk send alert notifications every n minutes
+- [x] Bulk send alert notifications every n seconds
 - [ ] Output type: full detailed JSON
 - [ ] Syslog output
 - [ ] CLI argument handling for configuration
