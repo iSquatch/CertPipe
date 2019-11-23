@@ -34,6 +34,9 @@ ignore_keywords = []
 enable_csv_output = True
 output_csv_file = "certpipe_matches.csv"
 
+# Alert bulk sending.  Groups alert messages together into single alert every n seconds.
+alert_send_frequency = 30
+
 # Slack alerting configuration.
 enable_slack = False
 slack_token = "<INSERT SLACK API TOKEN>"
