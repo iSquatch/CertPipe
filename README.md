@@ -1,8 +1,3 @@
-     _____   ______  ______ _______  _____  _____  _____   ______
-    |       |______ |_____/    |    |_____]   |   |_____] |______
-    |_____  |______ |    \_    |    |       __|__ |       |______
-
-
 # CertPipe
 
 A CertStream monitoring tool. Monitor and alert on Certificate Transparency logs by looking for keyword matches. 
